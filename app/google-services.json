@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "993813814376",
+    "firebase_url": "https://tdr-inc-4c9a7.firebaseio.com",
+    "project_id": "tdr-inc-4c9a7",
+    "storage_bucket": "tdr-inc-4c9a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993813814376:android:ab25604784f2e32e",
+        "android_client_info": {
+          "package_name": "com.example.jayshil.tdrinc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993813814376-40uvv7dernh11n0k4duhdd3s955v2dg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.jayshil.tdrinc",
+            "certificate_hash": "22f5eedfb995442c54c6bac600961d5dd6be3075"
+          }
+        },
+        {
+          "client_id": "993813814376-p54bdta3gdr95t2bc2ds6g4ql0h0piq1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW9-YZHFizFmgDj6fcwvCCo0hPM5-H74E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993813814376-p54bdta3gdr95t2bc2ds6g4ql0h0piq1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
