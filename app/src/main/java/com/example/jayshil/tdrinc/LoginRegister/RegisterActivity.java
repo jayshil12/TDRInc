@@ -1,4 +1,4 @@
-package com.example.jayshil.tdrinc;
+package com.example.jayshil.tdrinc.LoginRegister;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -10,12 +10,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.jayshil.tdrinc.Profile.ProfileActivity;
+import com.example.jayshil.tdrinc.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -26,6 +27,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +42,15 @@ public class RegisterActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = firebaseAuth.getCurrentUser();
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        if(user != null){
+
+            firebaseAuth.signOut();
+
+        }
 
     }
 
@@ -57,6 +66,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void registerClick(View v){
 
+        //-------Check Credentials code Starts---------------------
         String email = Email.getText().toString().trim();
         String password = Password.getText().toString().trim();
         String confirm_pass = Con_Password.getText().toString().trim();
@@ -71,7 +81,9 @@ public class RegisterActivity extends AppCompatActivity {
         }else if(!(TextUtils.equals(password, confirm_pass))){
 
             Toast.makeText(RegisterActivity.this, "Passwords are not matching",Toast.LENGTH_LONG).show();
+            //----------Check Credential Code Ends------------
 
+            //------------register new user code starts------------------
         }else{
 
             progressDialog.setMessage("Registering User....");
@@ -86,19 +98,44 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 finish();
                                 progressDialog.dismiss();
-                                Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(RegisterActivity.this, ProfileActivity.class);
-                                startActivity(intent);
+                                Toast.makeText(RegisterActivity.this, "Registration Successful \n Sending Verification Email", Toast.LENGTH_LONG).show();
+                                /*Intent intent1 = new Intent(RegisterActivity.this, LoginActivity.class);
+                                startActivity(intent1);*/
 
                                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
+                                //---------Save User Information---------------
                                 databaseReference.child(user.getUid()).setValue(user_info);
 
+                                //------Email Verification code starts------------
+                                if(user != null){
 
+                                    user.sendEmailVerification()
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+
+                                                    if(task.isSuccessful()){
+
+                                                        Toast.makeText(RegisterActivity.this, "Please Verify your email", Toast.LENGTH_LONG).show();
+
+                                                        firebaseAuth.signOut();
+
+                                                    }else {
+
+                                                        Toast.makeText(RegisterActivity.this, "Verification Email is not successfully sent", Toast.LENGTH_LONG).show();
+
+                                                    }
+
+                                                }
+                                            });
+                                }
+                                //------Email Verification Code Ends----------------
                             }
                             else{
 
-                                Toast.makeText(RegisterActivity.this, "Error", Toast.LENGTH_LONG).show();
+                                Toast.makeText(RegisterActivity.this, "Register Error occurred", Toast.LENGTH_LONG).show();
+                                progressDialog.dismiss();
 
                             }
                         }
@@ -106,6 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         }
-
+        //----------Register New user Code Ends------------------
     }
+
 }

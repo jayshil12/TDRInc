@@ -1,4 +1,4 @@
-package com.example.jayshil.tdrinc;
+package com.example.jayshil.tdrinc.LoginRegister;
 
 /**
  * Created by jayshil on 8/8/17.

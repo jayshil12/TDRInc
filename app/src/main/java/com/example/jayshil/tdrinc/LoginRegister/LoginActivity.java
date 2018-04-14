@@ -1,21 +1,22 @@
-package com.example.jayshil.tdrinc;
+package com.example.jayshil.tdrinc.LoginRegister;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.EmbossMaskFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.jayshil.tdrinc.Profile.ProfileActivity;
+import com.example.jayshil.tdrinc.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -59,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
             Toast.makeText(LoginActivity.this, "Please enter the password",Toast.LENGTH_LONG).show();
 
+            //-------------Login in user code Starts------------------
         }else {
 
             progressDialog.setMessage("Signing in....");
@@ -69,23 +71,39 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
 
-                            progressDialog.dismiss();
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                             if (task.isSuccessful()) {
 
-                                finish();
-                                Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
-                                startActivity(intent);
+                                try {
+
+                                    if(user.isEmailVerified()){
+                                        Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }else {
+
+                                        Toast.makeText(LoginActivity.this, "Email is not verified, Please Verify your Email", Toast.LENGTH_LONG).show();
+                                        progressDialog.dismiss();
+                                        firebaseAuth.signOut();
+                                    }
+
+                                }catch (NullPointerException e){
+
+                                }
+
 
                             } else {
 
                                 Toast.makeText(LoginActivity.this, "Login error occurred", Toast.LENGTH_LONG).show();
+                                progressDialog.dismiss();
 
                             }
 
                         }
                     });
         }
+        //-------------Login in user code Ends------------------
 
     }
 

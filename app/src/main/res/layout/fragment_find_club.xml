@@ -1,0 +1,85 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jayshil.tdrinc.FindClub.FindClubFragment"
+    android:background="@drawable/tdrback">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        app:srcCompat="@drawable/findclub_text" />
+
+    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+        android:id="@+id/state_choice"
+        android:layout_width="230dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/imageView2"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="44dp"
+        android:background="@drawable/spinner_bg"/>
+
+    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+        android:id="@+id/county_choice"
+        android:layout_width="230dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/state_choice"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/spinner_bg"/>
+
+    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+
+        android:id="@+id/city_Spin_"
+        android:layout_height="50dp"
+        android:layout_width="230dp"
+        android:layout_below="@+id/county_choice"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/spinner_bg"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:background="@drawable/state_text"
+        android:layout_alignBottom="@+id/state_choice"
+        android:layout_toStartOf="@+id/imageView2" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="135dp"
+        android:layout_height="40dp"
+        android:background="@drawable/county_text"
+        android:layout_above="@+id/city_Spin_"
+        android:layout_alignStart="@+id/textView2" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="90dp"
+        android:layout_height="40dp"
+        android:background="@drawable/city_text"
+        android:layout_alignBottom="@+id/city_Spin_"
+        android:layout_alignStart="@+id/textView3" />
+
+    <Button
+        android:id="@+id/find_club_b"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="58dp"
+        android:text="Button"
+        android:layout_below="@+id/city_Spin_"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>
