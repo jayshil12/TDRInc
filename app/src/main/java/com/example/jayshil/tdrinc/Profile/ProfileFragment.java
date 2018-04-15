@@ -1,21 +1,42 @@
 package com.example.jayshil.tdrinc.Profile;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.jayshil.tdrinc.LoginRegister.LoginActivity;
+import com.example.jayshil.tdrinc.LoginRegister.User_info;
 import com.example.jayshil.tdrinc.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
@@ -32,11 +53,23 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-    Button signOut;
+    Button signOut, editProfile;
     TextView text;
     View v;
+    ImageView profileImage, mainProfileImage;
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private Uri imagePath;
+    public Uri url;
+    public Uri onUrl;
+    String childString = "userProfileImages";
+
 
     FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
+    DatabaseReference ref1;
+    private StorageReference storageReference;
+    private String userID, userName;
+    String uriii;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -86,20 +119,115 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         signOut = (Button)v.findViewById(R.id.signout);
         text = (TextView)v.findViewById(R.id.welcometext);
+        editProfile = (Button)v.findViewById(R.id.editProfileB);
+        mainProfileImage = (ImageView)v.findViewById(R.id.imageMain);
+
+//---------------------------Firebase Variable Declaration----------------------
         firebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        ref1 = FirebaseDatabase.getInstance().getReference();
+        storageReference = FirebaseStorage.getInstance().getReference("profileImages");
+        userID = user.getUid();
+
 
         if(firebaseAuth.getCurrentUser()==null){
             getActivity().finish();
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             startActivity(intent);
         }
+ref1.addValueEventListener(new ValueEventListener() {
+    @Override
+    public void onDataChange(DataSnapshot dataSnapshot) {
+        Image_Upload image = new Image_Upload();
+        image.setImageUri(dataSnapshot.child(childString).child(userID).getValue(Image_Upload.class).getImageUri());
+        uriii = image.getImageUri();
+        Log.d("URI: ",uriii);
+        onUrl = Uri.parse(uriii);
+        if(onUrl != null){
+            Glide.with(getContext()).load(onUrl).centerCrop().into(mainProfileImage);
+        }
+        else {
+            mainProfileImage.setImageResource(R.drawable.cam);
+        }
 
-        FirebaseUser user = firebaseAuth.getCurrentUser();
-        text.setText("Welcome "+user.getEmail());
+    }
+
+    @Override
+    public void onCancelled(DatabaseError databaseError) {
+
+    }
+});
+
+//----------------------Get Name from Database-----------------------------
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snap: dataSnapshot.getChildren()){
+                    User_info userInfo = new User_info();
+                    userInfo.setName(snap.child(userID).getValue(User_info.class).getName());
+                    userName = userInfo.getName();
+                    text.setText(userInfo.getName());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+//----------------------Get Name From Database Ends-----------------------------
+
+        //getProfileImageFromDatabase(uriii);
 
         signOut.setOnClickListener(this);
-
+        editProfile.setOnClickListener(this);
         return v;
+
+    }
+//------------------------Update Profile Name Code-------------------------------------------
+    public void updateProfile(final String uId, String uName){
+        AlertDialog.Builder dialog =  new AlertDialog.Builder(v.getContext());
+        final View vee = LayoutInflater.from(v.getContext()).inflate(R.layout.update_profile, null, false);
+        dialog.setView(vee);
+        profileImage = (ImageView)vee.findViewById(R.id.circleImageView);
+        final EditText name11 = (EditText)vee.findViewById(R.id.newname);
+        Button upButton = (Button)vee.findViewById(R.id.upbut);
+
+        name11.setText(uName);
+        Glide.with(getContext()).load(onUrl).centerCrop().into(profileImage);
+
+        dialog.setTitle("Update Profile");
+        final AlertDialog alertDialog = dialog.create();
+        alertDialog.show();
+
+        upButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String name = name11.getText().toString();
+                if(TextUtils.isEmpty(name)){
+                    Toast.makeText(getActivity(), "Name is required", Toast.LENGTH_LONG).show();
+                }else {
+                    updateName(uId, name);
+                    alertDialog.dismiss();
+                }
+
+
+            }
+        });
+
+        profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeProfilePicture();
+            }
+        });
+    }
+//------------------------Update Profile Name Code Ends------------------------------------------
+
+    public void changeProfilePicture(){
+        openFilechooser();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -134,6 +262,88 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             startActivity(new Intent(getActivity(), LoginActivity.class));
 
         }
+        if(v ==editProfile){
+            updateProfile(userID, userName);
+        }
+
+
+    }
+//----------------------------Insert Updated Name into Database---------------------------------------------
+    public void updateName(String useId, String useName){
+
+        DatabaseReference databaseref = FirebaseDatabase.getInstance().getReference("userinfo").child(useId);
+        User_info info = new User_info(useName);
+        databaseref.setValue(info);
+    }
+
+    public void openFilechooser(){
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null){
+            imagePath = data.getData();
+            profileImage.setImageURI(imagePath);
+            uploadImage();
+        }
+    }
+
+    private String getImageExtension(Uri uri){
+        ContentResolver cr = getActivity().getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cr.getType(uri));
+    }
+    public void uploadImage(){
+        StorageReference ref = storageReference.child(userName+"."+getImageExtension(imagePath));
+
+        ref.putFile(imagePath)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //url = taskSnapshot.getDownloadUrl();
+                        uriii = taskSnapshot.getDownloadUrl().toString();
+
+                        Image_Upload image_upload = new Image_Upload(taskSnapshot.getDownloadUrl().toString());
+                        databaseReference.child("userProfileImages").child(userID).setValue(image_upload);
+
+                        getProfileImageFromDatabase(uriii);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(), "Image not Uploaded", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    public void getProfileImageFromDatabase(final String u){
+
+        DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference();
+
+        dataRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot snap: dataSnapshot.getChildren()){
+                    //Image_Upload image = new Image_Upload(url.toString());
+                    //image.setImageUri(snap.child(userID).getValue(Image_Upload.class).getImageUri());
+                    Glide.with(getContext()).load(u).centerCrop().into(mainProfileImage);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.jayshil.tdrinc.Profile.Image_Upload;
 import com.example.jayshil.tdrinc.Profile.ProfileActivity;
 import com.example.jayshil.tdrinc.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,9 +25,11 @@ public class RegisterActivity extends AppCompatActivity {
 
     EditText Email, Password, Con_Password, U_Name;
     private ProgressDialog progressDialog;
+    final String defaultImageUrl ="https://firebasestorage.googleapis.com/v0/b/tdr-inc-4c9a7.appspot.com/o/Camera-icon.png?alt=media&token=e0f1240b-da4f-45c0-8b0c-6c8f30f7bd5e";
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
+    private DatabaseReference ref2;
 
 
     @Override
@@ -43,9 +46,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
-
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-
+        databaseReference = FirebaseDatabase.getInstance().getReference("userinfo");
+        ref2 = FirebaseDatabase.getInstance().getReference("userProfileImages");
         if(user != null){
 
             firebaseAuth.signOut();
@@ -73,6 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
         String name = U_Name.getText().toString().trim();
 
         final User_info user_info = new User_info(name);
+        final Image_Upload image1 = new Image_Upload(defaultImageUrl);
 
         if(TextUtils.isEmpty(email) || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirm_pass) || TextUtils.isEmpty(name)){
 
@@ -106,6 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 //---------Save User Information---------------
                                 databaseReference.child(user.getUid()).setValue(user_info);
+                                ref2.child(user.getUid()).setValue(image1);
 
                                 //------Email Verification code starts------------
                                 if(user != null){
@@ -134,7 +138,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                             else{
 
-                                Toast.makeText(RegisterActivity.this, "Register Error occurred", Toast.LENGTH_LONG).show();
+                                Toast.makeText(RegisterActivity.this, "Register Error", Toast.LENGTH_LONG).show();
                                 progressDialog.dismiss();
 
                             }

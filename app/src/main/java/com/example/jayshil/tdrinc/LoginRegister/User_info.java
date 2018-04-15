@@ -12,7 +12,7 @@ public class User_info {
 
     }
 
-    public User_info(String name) {
+    public User_info(String name){
         this.name = name;
     }
 
@@ -23,4 +23,5 @@ public class User_info {
     public String getName() {
         return name;
     }
+
 }
